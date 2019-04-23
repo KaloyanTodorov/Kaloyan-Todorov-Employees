@@ -22,13 +22,10 @@ while ((matches = regex.exec(data)) !== null) {
         regex.lastIndex++;
     }
     
-    // The result can be accessed through the `matches`-variable.
+    // Iterating through all matches
     matches.forEach(match => {
         let args = match.split(', ');
         let [empId, projId, dateFrom, dateTo] = args;
-
-        dateFrom = convertDate(dateFrom);
-        dateTo = convertDate(dateTo);
 
         if(!projects.hasOwnProperty(projId)) {
             projects[projId] = [];
@@ -79,26 +76,16 @@ for (const projectName in projects) {
                 if(mostDaysWorkingTogether <= numberOfDaysTogether / oneDay) {
                     mostDaysWorkingTogether = numberOfDaysTogether / oneDay;
                     
-                    // Empty array
+                    // Empty the array
                     selectedPair.length = 0;
-                    selectedPair.push(currentEmployee);
-                    selectedPair.push(nextEmployee);
+
+                    selectedPair.push(currentEmployee, nextEmployee);
                 } 
             }
         }
 
         printResult(projectName, selectedPair);
     }
-}
-
-function convertDate(date) {
-    if (date === 'NULL') {
-        date = new Date();
-    } else {
-        date = new Date(date);
-    }
-    
-    return date;
 }
 
 function printResult(projectName, selectedPair) {
