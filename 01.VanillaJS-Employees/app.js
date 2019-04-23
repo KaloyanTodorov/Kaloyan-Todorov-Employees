@@ -1,7 +1,7 @@
 const fs = require('fs');
 const Employee = require('./employee');
 
-// Read the data from file named 'file.txt'. It should be in the same folder. If not, then change the name and path to it.
+// Read the data from file named 'file.txt'. It should be in the same folder. If not in the same folder or with different name, then change the name and path to it.
 const data = fs.readFileSync('file.txt', 'utf8');
 
 // Get all text for each line
@@ -10,6 +10,7 @@ const regex = /^.+$/gm;
 let matches;
 const projects = {};
 
+// Iterate through all lines of the file
 while ((matches = regex.exec(data)) !== null) {
     // Skip the headers line
     if(matches.index === 0) {
@@ -46,12 +47,13 @@ for (const projectName in projects) {
     if (projects.hasOwnProperty(projectName)) {
         const project = projects[projectName];
         
+        // If only one employee working on the project
         if(project.length === 1) {
             console.log( `Only one employee worked on project >>${projectName}<<.`);
             continue;
         }
 
-        // Here we save the pa
+        // Here we initialize an empty array for the pair
         const selectedPair = [];
         let mostDaysWorkingTogether = 0;
 
@@ -71,9 +73,13 @@ for (const projectName in projects) {
                 const dateEndedWorkingTogether = new Date(Math.min(currentEmployee.dateTo, nextEmployee.dateTo));
 
                 const numberOfDaysTogether = dateEndedWorkingTogether - dateStartedWorkingTogether;
+                const oneDay = (24 * 60 * 60 * 1000);
 
-                if(mostDaysWorkingTogether <= numberOfDaysTogether / (24 * 3600 * 1000)) {
-                    mostDaysWorkingTogether = numberOfDaysTogether / (24 * 3600 * 1000);
+                // Check if there is a pair who worked for more days than the previous one, initially it's 0 days.
+                if(mostDaysWorkingTogether <= numberOfDaysTogether / oneDay) {
+                    mostDaysWorkingTogether = numberOfDaysTogether / oneDay;
+                    
+                    // Empty array
                     selectedPair.length = 0;
                     selectedPair.push(currentEmployee);
                     selectedPair.push(nextEmployee);
