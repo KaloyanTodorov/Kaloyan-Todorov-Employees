@@ -99,11 +99,16 @@ const helpers = (() => {
 
     function findPairWhoWorkedMost(coworkersPairs) {
 
-        const finalPair = ['', 0];
+        let finalPair = {
+            pair: '',
+            totalDays: 0
+        };
         for (const key in coworkersPairs) {
-            if(finalPair[1] <= coworkersPairs[key].totalDays) {
-                finalPair.length = 0;
-                finalPair.push(key, coworkersPairs[key].totalDays);
+            if(finalPair.totalDays <= coworkersPairs[key].totalDays) {
+                finalPair = {
+                    pair: key,
+                    totalDays: coworkersPairs[key].totalDays
+                }   
             }
         }
 
@@ -111,7 +116,7 @@ const helpers = (() => {
     }
 
     function printResult(pair) {
-        console.log(`The pair of co-workers who worked most days togather on various projects are ${pair[0]}. They worked for a total of ${pair[1]} days togather.`);
+        console.log(`The pair of co-workers who worked most days togather on various projects are ${pair.pair}. They worked for a total of ${pair.totalDays} days togather.`);
     }
 
     // Private function
