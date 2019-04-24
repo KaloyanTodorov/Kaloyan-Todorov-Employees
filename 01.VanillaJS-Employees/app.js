@@ -1,43 +1,15 @@
 const fs = require('fs');
-const Employee = require('./employee');
+const helpers = require('./helpers');
 
 // Read the data from file named 'file.txt'. It should be in the same folder. If not in the same folder or with different name, then change the name and path to it.
-const data = fs.readFileSync('file.txt', 'utf8');
+const data = fs.readFileSync('file.txt');
 
-// Get all text for each line
-const regex = /^.+$/gm;
-
-let matches;
 const projects = {};
 
-// Iterate through all lines of the file
-while ((matches = regex.exec(data)) !== null) {
-    // Skip the headers line
-    if(matches.index === 0) {
-        continue;
-    }
-    
-    // This is necessary to avoid infinite loops with zero-width matches
-    if (matches.index === regex.lastIndex) {
-        regex.lastIndex++;
-    }
-    
-    // Iterating through all matches
-    matches.forEach(match => {
-        let args = match.split(', ');
-        let [empId, projId, dateFrom, dateTo] = args;
+helpers.populateAllProjects(data, projects);
 
-        if(!projects.hasOwnProperty(projId)) {
-            projects[projId] = [];
-        }
-
-        projects[projId].push(new Employee(
-            empId,
-            dateFrom,
-            dateTo,
-        ));
-    })
-}
+// Here we initialize a map which will hold all co-worker pairs
+const coworkersPairs = {};
 
 for (const projectName in projects) {
     // Iterate all projects
@@ -46,13 +18,8 @@ for (const projectName in projects) {
         
         // If only one employee working on the project
         if(project.length === 1) {
-            console.log( `Only one employee worked on project >>${projectName}<<.`);
             continue;
         }
-
-        // Here we initialize an empty array for the pair
-        const selectedPair = [];
-        let mostDaysWorkingTogether = 0;
 
         for (let i = 0; i < project.length - 1; i++) {
             for (let j = i + 1; j < project.length; j++) {
@@ -65,29 +32,34 @@ for (const projectName in projects) {
                     currentEmployee.dateTo < nextEmployee.dateFrom) {
                     continue;
                 }
+
+                // Sort the pair so we get the same key for the map
+                const pair = [currentEmployee.empId, nextEmployee.empId].sort();
+
+                if(!coworkersPairs[pair]) {
+                    coworkersPairs[pair] = {
+                        dates: [],
+                        totalDays: 0
+                    };
+                }
                 
                 const dateStartedWorkingTogether = new Date(Math.max(currentEmployee.dateFrom, nextEmployee.dateFrom));
                 const dateEndedWorkingTogether = new Date(Math.min(currentEmployee.dateTo, nextEmployee.dateTo));
-
-                const numberOfDaysTogether = dateEndedWorkingTogether - dateStartedWorkingTogether;
-                const oneDay = (24 * 60 * 60 * 1000);
-
-                // Check if there is a pair who worked for more days than the previous one, initially it's 0 days.
-                if(mostDaysWorkingTogether <= numberOfDaysTogether / oneDay) {
-                    mostDaysWorkingTogether = numberOfDaysTogether / oneDay;
-                    
-                    // Empty the array
-                    selectedPair.length = 0;
-
-                    selectedPair.push(currentEmployee, nextEmployee);
-                } 
+                
+                coworkersPairs[pair].dates.push([dateStartedWorkingTogether, dateEndedWorkingTogether]);
             }
         }
-
-        printResult(projectName, selectedPair);
     }
 }
 
-function printResult(projectName, selectedPair) {
-    console.log(`The two employees who worked most on project >>${projectName}<< are ~${selectedPair[0].empId}~ and ~${selectedPair[1].empId}~`);
-}
+// Sort the map 
+helpers.sortMap(coworkersPairs);
+
+helpers.sumTotalWorkDays(coworkersPairs);
+
+// Unhide to see all raw data. Use unique pair of empId's to 
+console.log(coworkersPairs);
+
+const finalResult = helpers.findPairWhoWorkedMost(coworkersPairs);
+
+helpers.printResult(finalResult);

@@ -19,11 +19,21 @@ class Employee {
 
     set dateTo(date) {
         if(date === 'NULL') {
-            this._dateTo = new Date();
+            this._dateTo = this._getTodayDate();
         } else {
             this._dateTo = new Date(date);
         }
     }
+
+    _getTodayDate() {
+        let date = new Date();
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0'); //January is 0!
+        const yyyy = date.getFullYear();
+    
+        return new Date(yyyy + '-' + mm + '-' + dd );
+    }
+    
 }
 
 module.exports = Employee;
