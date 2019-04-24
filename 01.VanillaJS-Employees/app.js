@@ -62,7 +62,7 @@ helpers.sortMap(coworkersPairs);
 helpers.sumTotalWorkDays(coworkersPairs);
 
 // Unhide to see all raw data. Use unique pair of empId's to check their specific data.
-// console.log(coworkersPairs['143,144a']);
+console.log(coworkersPairs['143,144a']);
 
 const finalResult = helpers.findPairWhoWorkedMost(coworkersPairs);
 

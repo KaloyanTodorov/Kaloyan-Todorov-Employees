@@ -63,7 +63,7 @@ const helpers = (() => {
         for (const key in coworkersPairs) {
             currentPair = coworkersPairs[key];
             if(currentPair.dates.length === 1) {
-                currentPair.totalDays = _countDays(currentPair);
+                currentPair.totalDays = _countDays(currentPair.dates[0]);
                 continue;
             }
 
@@ -76,10 +76,17 @@ const helpers = (() => {
                 const nextDates = currentPair.dates[i + 1];
                 
                 if(firstDates.dateTo < nextDates.dateFrom) {
-                    currentPair.totalDays += _countDays(firstDates, i);
+                    if(continuedWork.dateFrom !== '') {
+                        currentPair.totalDays += _countDays(continuedWork);
 
-                    continuedWork.dateFrom = '';
-                    continuedWork.dateTo = '';
+                        continuedWork.dateFrom = '';
+                        continuedWork.dateTo = '';
+                    } else {
+                        currentPair.totalDays += _countDays(firstDates);
+    
+                        continuedWork.dateFrom = '';
+                        continuedWork.dateTo = '';
+                    }
                 } else {
                     if(continuedWork.dateFrom === '') {
                         continuedWork.dateFrom = firstDates.dateFrom;
@@ -89,7 +96,6 @@ const helpers = (() => {
                     }
 
                     if(i === currentPair.dates.length - 2) {
-
                         currentPair.totalDays += _countDays(continuedWork);
                     }
                 }
@@ -120,7 +126,7 @@ const helpers = (() => {
     }
 
     // Private function
-    function _countDays(currentPair, i = 0) {
+    function _countDays(currentPair) {
         const dateStartedWorkingTogether = currentPair.dateFrom;
         const dateEndedWorkingTogether = currentPair.dateTo;
 
