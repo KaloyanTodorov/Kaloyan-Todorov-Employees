@@ -46,7 +46,10 @@ for (const projectName in projects) {
                 const dateStartedWorkingTogether = new Date(Math.max(currentEmployee.dateFrom, nextEmployee.dateFrom));
                 const dateEndedWorkingTogether = new Date(Math.min(currentEmployee.dateTo, nextEmployee.dateTo));
                 
-                coworkersPairs[pair].dates.push([dateStartedWorkingTogether, dateEndedWorkingTogether]);
+                coworkersPairs[pair].dates.push({
+                    dateFrom: dateStartedWorkingTogether, 
+                    dateTo: dateEndedWorkingTogether
+                });
             }
         }
     }
@@ -55,10 +58,11 @@ for (const projectName in projects) {
 // Sort the map 
 helpers.sortMap(coworkersPairs);
 
+// Sum the total days for each pair of coworkers
 helpers.sumTotalWorkDays(coworkersPairs);
 
-// Unhide to see all raw data. Use unique pair of empId's to 
-console.log(coworkersPairs);
+// Unhide to see all raw data. Use unique pair of empId's to check their specific data.
+// console.log(coworkersPairs['143,144a']);
 
 const finalResult = helpers.findPairWhoWorkedMost(coworkersPairs);
 

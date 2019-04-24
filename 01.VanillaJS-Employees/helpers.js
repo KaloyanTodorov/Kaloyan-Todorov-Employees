@@ -49,11 +49,11 @@ const helpers = (() => {
             }
         
             coworkersPairs[pair].dates.sort((a, b) => {
-                if(a[0] < b[0]) {
-                    return a[0] > b[0];
+                if(a.dateFrom < b.dateFrom) {
+                    return a.dateFrom > b.dateFrom;
                 }
         
-                return a[1] > b[1];
+                return a.dateTo > b.dateTo;
             });
         }
     }
@@ -67,30 +67,35 @@ const helpers = (() => {
                 continue;
             }
 
-            let continuedWork = [];
+            const continuedWork = {
+                dateFrom: '',
+                dateTo: ''
+            };
             for (let i = 0; i < currentPair.dates.length - 1; i++) {
                 const firstDates = currentPair.dates[i];
                 const nextDates = currentPair.dates[i + 1];
                 
-                if(firstDates[1] < nextDates[0]) {
-                    currentPair.totalDays += _countDays(currentPair);
-                    continuedWork.length = 0;
+                if(firstDates.dateTo < nextDates.dateFrom) {
+                    currentPair.totalDays += _countDays(firstDates, i);
+
+                    continuedWork.dateFrom = '';
+                    continuedWork.dateTo = '';
                 } else {
-                    if(continuedWork.length === 0) {
-                        continuedWork.push(firstDates[0], nextDates[1]);
-                    } else if(continuedWork[1] < nextDates[1]){
-                        continuedWork.length = 1;
-                        continuedWork.push(nextDates[1]);
+                    if(continuedWork.dateFrom === '') {
+                        continuedWork.dateFrom = firstDates.dateFrom;
+                        continuedWork.dateTo = nextDates.dateTo;
+                    } else if(continuedWork.dateTo < nextDates.dateTo){
+                        continuedWork.dateTo = nextDates.dateTo;
                     }
 
                     if(i === currentPair.dates.length - 2) {
-                        currentPair.totalDays += (continuedWork[1] - continuedWork[0]) / ONE_DAY;
+
+                        currentPair.totalDays += _countDays(continuedWork);
                     }
                 }
             }
         }
     }
-
 
     function findPairWhoWorkedMost(coworkersPairs) {
 
@@ -109,14 +114,15 @@ const helpers = (() => {
         console.log(`The pair of co-workers who worked most days togather on various projects are ${pair[0]}. They worked for a total of ${pair[1]} days togather.`);
     }
 
-    function _countDays(currentPair) {
-        const dateStartedWorkingTogether = currentPair.dates[0][0];
-        const dateEndedWorkingTogether = currentPair.dates[0][1];
+    // Private function
+    function _countDays(currentPair, i = 0) {
+        const dateStartedWorkingTogether = currentPair.dateFrom;
+        const dateEndedWorkingTogether = currentPair.dateTo;
 
         return (dateEndedWorkingTogether - dateStartedWorkingTogether) / ONE_DAY + 1;
     }
 
-    return{
+    return {
         populateAllProjects,
         sortMap,
         sumTotalWorkDays,
